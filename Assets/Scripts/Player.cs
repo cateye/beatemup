@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class Player : Character
 {
-    
+
     public InputHandler input; //reference to the InputHandler
 
-    public float walkSpeed = 2;
-    public float runSpeed = 5;
+    private const float WALK_SPEED = 2;
+    private const float RUN_SPEED = 5;
 
     Vector3 currentDir;
 
@@ -61,7 +61,7 @@ public class Player : Character
         isJumpLandAnim = baseAnim.GetCurrentAnimatorStateInfo(0).IsName("Player_jump_land");
         isJumpingAnim = baseAnim.GetCurrentAnimatorStateInfo(0).IsName("Player_jump_rise") || baseAnim.GetCurrentAnimatorStateInfo(0).IsName("Player_jump_fall");
         //
-        if (isAutoPiloting){ return; }
+        if (isAutoPiloting) { return; }
 
         float h = input.GetHorizontalAxis();
         float v = input.GetVerticalAxis();
@@ -70,20 +70,22 @@ public class Player : Character
 
         currentDir = new Vector3(h, 0, v);
         currentDir.Normalize();
+        float now = Time.time;
         if (!isAttackingAnim && !isKnockedOut)
         {
-            if((v == 0 && h == 0))
+            if ((v == 0 && h == 0) && isMoving)
             {
                 PlayerStop();
                 isMoving = false;
-            } else if (!isMoving && (v!= 0 || h != 0))
+            }
+            else if (v != 0 || h != 0)
             {
                 isMoving = true;
                 //a positive dotProduct means the same direction was pressed twice
-                float dotProduct = Vector3.Dot(currentDir, lastWalkVector); 
+                float dotProduct = Vector3.Dot(currentDir, lastWalkVector);
 
                 //if tap two times in the same direction the player run 
-                if (canRun && Time.time < lastWalk + tapAgainToRunTime && dotProduct > 0)
+                if (canRun && now < lastWalk + tapAgainToRunTime && dotProduct > 0)
                 {
                     PlayerRun();
                 }
@@ -91,23 +93,24 @@ public class Player : Character
                 {
                     PlayerWalk();
                     //Store current movement direction and current time (only horizontal)
-                    if(h != 0)
+                    if (h != 0)
                     {
                         lastWalkVector = currentDir;
-                        lastWalk = Time.time;
+                        lastWalk = now;
                     }
                 }
             }
         }
 
-        if (jump && !isJumpLandAnim && !isKnockedOut && !isAttackingAnim && (isGrounded || Time.time < lastJumpTime + jumpDuration))
+        if (jump && !isJumpLandAnim && !isKnockedOut && !isAttackingAnim && (isGrounded || now < lastJumpTime + jumpDuration))
         {
             PlayerJump(currentDir);
-            
+
         }
 
-        if(!isKnockedOut && attack && (Time.time>= lastAttackTime + attackLimit)) {
-            lastAttackTime = Time.time;
+        if (!isKnockedOut && attack && (now >= lastAttackTime + attackLimit))
+        {
+            lastAttackTime = now;
             Attack();
         }
 
@@ -151,16 +154,16 @@ public class Player : Character
 
     public void PlayerWalk()
     {
-        speed = walkSpeed;
+        speed = WALK_SPEED;
         isRunning = false;
         baseAnim.SetFloat("Speed", speed);
     }
 
     public void PlayerRun()
     {
-        speed = runSpeed;
+        speed = RUN_SPEED;
         isRunning = true;
-       // baseAnim.SetBool("isRunning", isRunning);
+        // baseAnim.SetBool("isRunning", isRunning);
         baseAnim.SetFloat("Speed", speed);
     }
 
@@ -178,7 +181,7 @@ public class Player : Character
         }
         //Add force to the character to jump
         Vector3 verticalVector = Vector3.up * jumpForce * Time.deltaTime;
-        
+
         characterRB.AddForce(verticalVector, ForceMode.Force);
     }
 
@@ -195,7 +198,8 @@ public class Player : Character
         if (!isGrounded)
         {
 
-            if(isJumpingAnim && canJumpAttack) {
+            if (isJumpingAnim && canJumpAttack)
+            {
 
                 canJumpAttack = false;
                 currentAttackChain = 1;
@@ -207,17 +211,18 @@ public class Player : Character
                 characterRB.useGravity = false;
 
             }
-        } else
+        }
+        else
         if (isRunning)
         {
-            characterRB.AddForce((Vector3.up + (frontVector * 5)) * runAttackForce,
-ForceMode.Impulse);
+            characterRB.AddForce((Vector3.up + (frontVector * 5)) * runAttackForce, ForceMode.Impulse);
             currentAttackChain = 1;
             evaluatedAttackChain = 0;
             baseAnim.SetInteger("EvaluatedChain", evaluatedAttackChain);
             baseAnim.SetInteger("CurrentChain", currentAttackChain);
 
-        } else
+        }
+        else
         {
             currentAttackChain = 1;
             evaluatedAttackChain = 0;
@@ -277,12 +282,15 @@ ForceMode.Impulse);
 
     protected override void HitCharacter(Character character, Vector3 hitPoint, Vector3 hitVector)
     {
-        if (baseAnim.GetCurrentAnimatorStateInfo(0).IsName("attack1")) {
+        if (baseAnim.GetCurrentAnimatorStateInfo(0).IsName("attack1"))
+        {
             base.HitCharacter(character, hitPoint, hitVector);
-        } else if (baseAnim.GetCurrentAnimatorStateInfo(0).IsName("Player_jump_attack"))
+        }
+        else if (baseAnim.GetCurrentAnimatorStateInfo(0).IsName("Player_jump_attack"))
         {
             AnalizeSpecialAttack(jumpAttack, character, hitPoint, hitVector);
-        }else if (baseAnim.GetCurrentAnimatorStateInfo(0).IsName("Player_run_attack"))
+        }
+        else if (baseAnim.GetCurrentAnimatorStateInfo(0).IsName("Player_run_attack"))
         {
             AnalizeSpecialAttack(runAttack, character, hitPoint, hitVector);
         }
