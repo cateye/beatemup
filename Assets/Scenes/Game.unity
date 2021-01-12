@@ -1089,10 +1089,8 @@ MonoBehaviour:
   normalAttack:
     attackDamage: 5
     force: 20
-    knockdown: 1
+    knockdown: 0
   input: {fileID: 290374810}
-  walkSpeed: 2
-  runSpeed: 5
   canRun: 1
   jumpForce: 1750
   canJumpAttack: 1
@@ -1104,6 +1102,20 @@ MonoBehaviour:
   walker: {fileID: 2068768959}
   isAutoPiloting: 0
   controllable: 1
+  runAttack:
+    attackDamage: 10
+    force: 120
+    knockdown: 1
+  runAttackForce: 1.8
+  normalAttack2:
+    attackDamage: 10
+    force: 50
+    knockdown: 0
+  normalAttack3:
+    attackDamage: 11
+    force: 50
+    knockdown: 1
+  chainComboLimit: 0.3
 --- !u!54 &2068768956
 Rigidbody:
   m_ObjectHideFlags: 0

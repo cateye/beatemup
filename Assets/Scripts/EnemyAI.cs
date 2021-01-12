@@ -94,7 +94,7 @@ public class EnemyAI : MonoBehaviour
     private void DecideWithWeights(int attack, int wait, int chase, int move)
     {
         weights.Clear();
-        //1
+     
         if (attack > 0)
         {
             weights.Add(new DecisionWeight(attack, EnemyAction.Attack));

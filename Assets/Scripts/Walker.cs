@@ -2,21 +2,21 @@
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
-//1
+
 [RequireComponent(typeof(Character))]
 public class Walker : MonoBehaviour
 {
-    //2
+  
     public NavMeshAgent navMeshAgent;
     private NavMeshPath navPath;
     private List<Vector3> corners;
-    //3
+    
     float currentSpeed;
     float speed;
-    //4
+    
     private Character character;
     private System.Action didFinishWalk;
-    //5
+    
     void Start()
     {
         //prevent NavMeshAgent from updating this GameObject's transform
@@ -44,7 +44,6 @@ public class Walker : MonoBehaviour
     {
         navPath = null;
         corners = null;
-
         currentSpeed = 0;
     }
 

@@ -12,6 +12,8 @@ public class MainMenu : MonoBehaviour
 
     public void GoToGame()
     {
+
+        GameManager.currentLevel = 0;
         SceneManager.LoadScene("Game");
     }
 }

@@ -87,8 +87,7 @@ public class Robot : Enemy
         yield return new WaitForSeconds(2.0f);
         baseAnim.SetTrigger("GetUp");
         knockdownRoutine = null;
-        ai.enabled = true;
-
+        if (!isKnockedOut) { ai.enabled = true; }
     }
 
 }

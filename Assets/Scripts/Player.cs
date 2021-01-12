@@ -48,6 +48,14 @@ public class Player : Character
     public AttackData runAttack;
     public float runAttackForce = 1.8f;
 
+    //Combo Data
+    public AttackData normalAttack2;
+    public AttackData normalAttack3;
+    
+    float chainComboTimer;
+    public float chainComboLimit = 0.3f;
+    const int maxCombo = 3;
+
 
     public override void Update()
     {
@@ -56,7 +64,12 @@ public class Player : Character
         //check if hurt animation is playing
         isHurtAnim = baseAnim.GetCurrentAnimatorStateInfo(0).IsName("Player_hurt");
         //check if the attack animation is playing
-        isAttackingAnim = baseAnim.GetCurrentAnimatorStateInfo(0).IsName("attack1") || baseAnim.GetCurrentAnimatorStateInfo(0).IsName("Player_jump_attack") || baseAnim.GetCurrentAnimatorStateInfo(0).IsName("Player_run_attack");
+        isAttackingAnim =
+          baseAnim.GetCurrentAnimatorStateInfo(0).IsName("attack1") ||
+          baseAnim.GetCurrentAnimatorStateInfo(0).IsName("Player_attack_2") ||
+          baseAnim.GetCurrentAnimatorStateInfo(0).IsName("Player_attack_3") ||
+          baseAnim.GetCurrentAnimatorStateInfo(0).IsName("Player_run_attack") ||
+          baseAnim.GetCurrentAnimatorStateInfo(0).IsName("Player_jump_attack");
         //check if any of the jump animation is playing
         isJumpLandAnim = baseAnim.GetCurrentAnimatorStateInfo(0).IsName("Player_jump_land");
         isJumpingAnim = baseAnim.GetCurrentAnimatorStateInfo(0).IsName("Player_jump_rise") || baseAnim.GetCurrentAnimatorStateInfo(0).IsName("Player_jump_fall");
@@ -73,12 +86,24 @@ public class Player : Character
         float now = Time.time;
         if (!isAttackingAnim && !isKnockedOut)
         {
-            if ((v == 0 && h == 0) && isMoving)
+            if (chainComboTimer > 0)
+            {
+                chainComboTimer -= Time.deltaTime;
+                if (chainComboTimer < 0)
+                {
+                    chainComboTimer = 0;
+                    currentAttackChain = 0;
+                    evaluatedAttackChain = 0;
+                    baseAnim.SetInteger("CurrentChain", currentAttackChain);
+                    baseAnim.SetInteger("EvaluatedChain", evaluatedAttackChain);
+                }
+            }
+                if (v == 0 && h == 0) 
             {
                 PlayerStop();
                 isMoving = false;
             }
-            else if (v != 0 || h != 0)
+            else if (!isMoving && (v != 0 || h != 0))
             {
                 isMoving = true;
                 //a positive dotProduct means the same direction was pressed twice
@@ -194,48 +219,57 @@ public class Player : Character
 
     public override void Attack()
     {
-
-        if (!isGrounded)
+        if (currentAttackChain <= maxCombo)
         {
-
-            if (isJumpingAnim && canJumpAttack)
+            if (!isGrounded)
             {
 
-                canJumpAttack = false;
+                if (isJumpingAnim && canJumpAttack)
+                {
+
+                    canJumpAttack = false;
+                    currentAttackChain = 1;
+                    evaluatedAttackChain = 0;
+                    baseAnim.SetInteger("EvaluatedChain", evaluatedAttackChain);
+                    baseAnim.SetInteger("CurrentChain", currentAttackChain);
+                    //pause the player rigidbody in the air until animation ends
+                    characterRB.velocity = Vector3.zero;
+                    characterRB.useGravity = false;
+
+                }
+            }
+            else
+            if (isRunning)
+            {
+                //creates lunge with upward and forward force
+                characterRB.AddForce((Vector3.up + (frontVector * 5)) * runAttackForce, ForceMode.Impulse);
+
                 currentAttackChain = 1;
                 evaluatedAttackChain = 0;
-                baseAnim.SetInteger("EvaluatedChain", evaluatedAttackChain);
                 baseAnim.SetInteger("CurrentChain", currentAttackChain);
-                //pause the player rigidbody in the air until animation ends
-                characterRB.velocity = Vector3.zero;
-                characterRB.useGravity = false;
+                baseAnim.SetInteger("EvaluatedChain", evaluatedAttackChain);
 
             }
-        }
-        else
-        if (isRunning)
-        {
-            characterRB.AddForce((Vector3.up + (frontVector * 5)) * runAttackForce, ForceMode.Impulse);
-            currentAttackChain = 1;
-            evaluatedAttackChain = 0;
-            baseAnim.SetInteger("EvaluatedChain", evaluatedAttackChain);
-            baseAnim.SetInteger("CurrentChain", currentAttackChain);
-
-        }
-        else
-        {
-            currentAttackChain = 1;
-            evaluatedAttackChain = 0;
-            baseAnim.SetInteger("EvaluatedChain", evaluatedAttackChain);
-            baseAnim.SetInteger("CurrentChain", currentAttackChain);
+            else
+            {
+                if (currentAttackChain == 0 || chainComboTimer == 0)
+                {
+                    currentAttackChain = 1;
+                    evaluatedAttackChain = 0;
+                }
+                baseAnim.SetInteger("EvaluatedChain", evaluatedAttackChain);
+                baseAnim.SetInteger("CurrentChain", currentAttackChain);
+            }
         }
 
 
     }
 
-    public void DidChain(int chain)
+    public void DidChain(int chain )
     {
-        baseAnim.SetInteger("EvaluatedChain", 1);
+        //This is called from the animation Event
+        evaluatedAttackChain = chain;
+        baseAnim.SetInteger("EvaluatedChain", evaluatedAttackChain);
     }
 
     //Method that animate the entrance of the character using  walker class
@@ -271,20 +305,36 @@ public class Player : Character
         evaluatedAttackChain = 0;
         baseAnim.SetInteger("EvaluatedChain", evaluatedAttackChain);
         baseAnim.SetInteger("CurrentChain", currentAttackChain);
-        Debug.Log("Here");
-
     }
 
     private void AnalizeSpecialAttack(AttackData attackData, Character character, Vector3 hitPoint, Vector3 hitVector)
     {
         character.EvaluateAttackData(attackData, hitVector, hitPoint);
+        chainComboTimer = chainComboLimit; //update the chain timer when there's a special attack
     }
+
+    private void AnalyzeNormalAttack(AttackData attackData, int attackChain, Character character, Vector3 hitPoint, Vector3 hitVector)
+    {
+        character.EvaluateAttackData(attackData, hitVector, hitPoint);
+        currentAttackChain = attackChain;
+        chainComboTimer = chainComboLimit;
+    }
+
 
     protected override void HitCharacter(Character character, Vector3 hitPoint, Vector3 hitVector)
     {
         if (baseAnim.GetCurrentAnimatorStateInfo(0).IsName("attack1"))
         {
-            base.HitCharacter(character, hitPoint, hitVector);
+            AnalyzeNormalAttack(normalAttack, 2, character, hitPoint, hitVector);
+
+        }
+        else if (baseAnim.GetCurrentAnimatorStateInfo(0).IsName("Player_attack_2"))
+        {
+            AnalyzeNormalAttack(normalAttack2, 3, character, hitPoint, hitVector);
+        }
+        else if (baseAnim.GetCurrentAnimatorStateInfo(0).IsName("Player_attack_3"))
+        {
+            AnalyzeNormalAttack(normalAttack3, 1, character, hitPoint, hitVector);
         }
         else if (baseAnim.GetCurrentAnimatorStateInfo(0).IsName("Player_jump_attack"))
         {
