@@ -10,6 +10,8 @@ public class GameManager : MonoBehaviour
     public bool cameraFollows;
     public CameraBounds cameraBounds;
 
+    public LifeBar enemyLifeBar;
+
     public LevelData currentLevelData;
     private BattleEvent currentBattleEvent;
     private int nextEventIndex;
@@ -55,10 +57,8 @@ public class GameManager : MonoBehaviour
         if (currentBattleEvent != null)
         {
             //has event, check if enemies are alive!
-            Debug.Log("Robot.TotalEnemies: " + Robot.TotalEnemies + "/r/nEnemy.totalEnemies: " + Enemy.TotalEnemies);
             if (Robot.TotalEnemies == 0)
             {
-                Debug.Log("completeCurrentEvent");
                 //no more enemies;
                 CompleteCurrentEvent();
             }
@@ -117,6 +117,7 @@ public class GameManager : MonoBehaviour
 
         hasRemainingEvents = currentLevelData.battleData.Count >
       nextEventIndex;
+        enemyLifeBar.EnableLifeBar(false);
         if (!hasRemainingEvents)
         {
             StartCoroutine(HeroWalkout());

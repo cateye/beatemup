@@ -9,6 +9,15 @@ public class Enemy : Character
     public Walker walker;
     public bool stopMovementWhenHit = true;
 
+
+    protected override void Start()
+    {
+        base.Start();
+        lifeBar =
+      GameObject.FindGameObjectWithTag("EnemyLifeBar").GetComponent<LifeBar>();
+        lifeBar.FillHpBar(currentLife / maxLife);
+    }
+
     public void RegisterEnemy()
     {
         TotalEnemies++;

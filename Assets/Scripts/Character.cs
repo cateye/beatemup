@@ -20,6 +20,11 @@ public class Character : MonoBehaviour
     public bool isGrounded; //detect collision with the floor
     public bool isAlive = true;
 
+    //LifeBar
+    public Sprite characterAvatar;
+    public LifeBar lifeBar;
+    public Color avatarColor;
+
     protected Coroutine knockdownRoutine;
     public bool isKnockedOut;
 
@@ -156,6 +161,10 @@ public class Character : MonoBehaviour
                 knockdownRoutine = StartCoroutine(KnockdownRoutine());
             }
         }
+
+        lifeBar.EnableLifeBar(true);
+        lifeBar.FillHpBar(currentLife / maxLife);
+        lifeBar.SetAvatar(characterAvatar, baseSprite.color);
     }
 
     public virtual bool CanWalk()

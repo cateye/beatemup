@@ -20,6 +20,8 @@ public class Player : Character
     float tapAgainToRunTime = 0.2f;
     Vector3 lastWalkVector;
 
+
+
     //Jump variables
     bool isJumpLandAnim;
     bool isJumpingAnim;
@@ -56,6 +58,18 @@ public class Player : Character
     public float chainComboLimit = 0.3f;
     const int maxCombo = 3;
 
+    //tolerance to being hit often
+    public float hurtTolerance;
+    public float hurtLimit = 20f;
+    public float recoveryRate = 5f;
+
+    protected override void Start()
+    {
+        base.Start();
+        lifeBar =
+      GameObject.FindGameObjectWithTag("PlayerLifeBar").GetComponent<LifeBar>();
+        lifeBar.FillHpBar(currentLife / maxLife);
+    }
 
     public override void Update()
     {
@@ -86,7 +100,7 @@ public class Player : Character
         float now = Time.time;
         if (!isAttackingAnim && !isKnockedOut)
         {
-            if (chainComboTimer > 0)
+            if (chainComboTimer > 0)        
             {
                 chainComboTimer -= Time.deltaTime;
                 if (chainComboTimer < 0)
@@ -137,6 +151,13 @@ public class Player : Character
         {
             lastAttackTime = now;
             Attack();
+        }
+
+        //after few hits it will trigger the knockdown
+        if(hurtTolerance < hurtLimit)
+        {
+            hurtTolerance += Time.deltaTime * recoveryRate;
+            hurtTolerance = Mathf.Clamp(hurtTolerance, 0, hurtLimit);
         }
 
     }
@@ -294,8 +315,14 @@ public class Player : Character
 
     public override void TakeDamage(float damage, Vector3 hitVector, bool knockdown = false)
     {
-        if (!isGrounded) { knockdown = true; }
+        hurtTolerance -= damage;
+        if(hurtTolerance <= 0 || !isGrounded)
+        {
+            hurtTolerance = hurtLimit;
+            knockdown = true;
+        }
         base.TakeDamage(damage, hitVector, knockdown);
+
     }
 
     public void DidJumpAttack()

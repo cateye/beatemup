@@ -67,6 +67,7 @@
     <Compile Include="Assets\Scripts\CameraBounds.cs" />
     <Compile Include="Assets\Scripts\Character.cs" />
     <Compile Include="Assets\Scripts\CharacterCallback.cs" />
+    <Compile Include="Assets\Scripts\DidComplete.cs" />
     <Compile Include="Assets\Scripts\Enemy.cs" />
     <Compile Include="Assets\Scripts\EnemyAI.cs" />
     <Compile Include="Assets\Scripts\GameManager.cs" />
@@ -76,6 +77,7 @@
     <Compile Include="Assets\Scripts\HitForwarder.cs" />
     <Compile Include="Assets\Scripts\InputHandler.cs" />
     <Compile Include="Assets\Scripts\LevelData.cs" />
+    <Compile Include="Assets\Scripts\LifeBar.cs" />
     <Compile Include="Assets\Scripts\MainMenu.cs" />
     <Compile Include="Assets\Scripts\Player.cs" />
     <Compile Include="Assets\Scripts\PlayerCallback.cs" />
