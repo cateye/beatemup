@@ -64,6 +64,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\ActionDPad.cs" />
     <Compile Include="Assets\Scripts\CameraBounds.cs" />
     <Compile Include="Assets\Scripts\Character.cs" />
     <Compile Include="Assets\Scripts\CharacterCallback.cs" />
@@ -72,7 +73,6 @@
     <Compile Include="Assets\Scripts\EnemyAI.cs" />
     <Compile Include="Assets\Scripts\GameManager.cs" />
     <Compile Include="Assets\Scripts\GridSnapper.cs" />
-    <Compile Include="Assets\Scripts\GridSnapperInspector.cs" />
     <Compile Include="Assets\Scripts\HeroDetector.cs" />
     <Compile Include="Assets\Scripts\HitForwarder.cs" />
     <Compile Include="Assets\Scripts\InputHandler.cs" />
